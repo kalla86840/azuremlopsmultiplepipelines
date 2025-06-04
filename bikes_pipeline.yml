@@ -1,0 +1,20 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.8'
+
+- script: |
+    pip install -r environment/requirements_bikes.txt
+    python models/random_forest/train.py data/bikes.csv
+    python ci_utils/evaluate_metrics_bikes.py
+    python ci_utils/model_eval_bikes.py
+    python models/random_forest/register_model.py
+    pip install azureml-core
+    python cd_utils/deploy_random_forest.py
+  displayName: 'CI/CD Pipeline for bikes'

@@ -1,0 +1,17 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.8'
+
+- script: |
+    pip install -r environment/requirements_cars.txt
+    python models/linear_regression/train.py data/cars.csv
+    python ci_utils/evaluate_metrics.py
+    python models/linear_regression/register_model.py
+  displayName: 'Run training, evaluate, and register model'

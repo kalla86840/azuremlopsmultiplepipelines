@@ -1,0 +1,20 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.8'
+
+- script: |
+    pip install -r environment/requirements_cars.txt
+    python models/linear_regression/train.py data/cars.csv
+    python ci_utils/evaluate_metrics_cars.py
+    python ci_utils/model_eval_cars.py
+    python models/linear_regression/register_model.py
+    pip install azureml-core
+    python cd_utils/deploy_linear_regression.py
+  displayName: 'CI/CD Pipeline for cars'

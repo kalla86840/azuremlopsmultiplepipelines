@@ -1,0 +1,20 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.8'
+
+- script: |
+    pip install -r environment/requirements_house.txt
+    python models/decision_tree/train.py data/house.csv
+    python ci_utils/evaluate_metrics_house.py
+    python ci_utils/model_eval_house.py
+    python models/decision_tree/register_model.py
+    pip install azureml-core
+    python cd_utils/deploy_decision_tree.py
+  displayName: 'CI/CD Pipeline for house'
